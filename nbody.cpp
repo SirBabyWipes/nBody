@@ -132,30 +132,24 @@ void updatePosition(std::vector<Particle> &particles, double dt){
 }
 
 int main(int argc, char* argv[]) {
-    // time and steps
-    //double dt = .1;
-    //int steps = 200;
-
-    // random initialization (n, dt, steps)
-    if (argc < 4) {
-        std::cerr << "Usage: " << argv[0]
-                  << " <numParticles> <dt> <steps>\n";
-        return 1;
-    }
-    std::string firstArg = argv[1];
-    double dt = std::stod(argv[2]);
-    int steps = std::stoi(argv[3]);
-
+    double dt;
+    int steps;
     std::vector<Particle> particles;
 
-    int n = std::stoi(argv[1]);
-    particles = iRandom(n);
+    if (argc < 4) {
+        dt = 200;
+        steps = 5000000;
+        particles = iFile("solar.tsv");
+    } else {
+        dt = std::stod(argv[2]);
+        steps = std::stoi(argv[3]);
+        int n = std::stoi(argv[1]);
+        particles = iRandom(n);
+    }
+    
 
     // predefined initialization
-    //std::vector<Particle> particles = iPredefined();
-
-    // file initialization
-    //std::vector<Particle> particles = iFile("solar.tsv");
+    // particles = iPredefined();
 
     /* check step 1
     std::cout << "Loaded " << particles.size() << " particles:\n";
@@ -191,6 +185,7 @@ int main(int argc, char* argv[]) {
     */
 
     // console out
+    /*
     for (int step = 0; step < steps; step++) {
         forces(particles);
         updateVelocity(particles, dt);
@@ -208,9 +203,11 @@ int main(int argc, char* argv[]) {
                                          << p.velocity[2] << ")\n";
         }
     }
-    
+    */
     // file out
-    std::ofstream out("sim_output.tsv");
+    std::ostringstream fname;
+    fname << "sim_output_" << particles.size() << ".tsv";
+    std::ofstream out(fname.str());
     for (int step = 0; step < steps; step++) {
         forces(particles);
         updateVelocity(particles, dt);
