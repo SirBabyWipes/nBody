@@ -4,6 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <cmath>
+#include <chrono>
 
 
 const double G = 6.674e-11;
@@ -134,16 +135,19 @@ void updatePosition(std::vector<Particle> &particles, double dt){
 int main(int argc, char* argv[]) {
     double dt;
     int steps;
+    int dumpInterval;
     std::vector<Particle> particles;
 
-    if (argc < 4) {
+    if (argc != 5) {
         dt = 200;
         steps = 5000000;
+        dumpInterval = 100;
         particles = iFile("solar.tsv");
     } else {
+        int n = std::stoi(argv[1]);
         dt = std::stod(argv[2]);
         steps = std::stoi(argv[3]);
-        int n = std::stoi(argv[1]);
+        dumpInterval = std::stoi(argv[4]);
         particles = iRandom(n);
     }
     
@@ -208,31 +212,40 @@ int main(int argc, char* argv[]) {
     std::ostringstream fname;
     fname << "sim_output_" << particles.size() << ".tsv";
     std::ofstream out(fname.str());
+
+    // start time
+    auto start = std::chrono::high_resolution_clock::now();
+
     for (int step = 0; step < steps; step++) {
         forces(particles);
         updateVelocity(particles, dt);
         updatePosition(particles, dt);
 
-        // number of particles
-        out << particles.size();
-
-        // particle info
-        for (const Particle &p : particles) {
-            out << "\t" << p.mass
-                << "\t" << p.position[0]
-                << "\t" << p.position[1]
-                << "\t" << p.position[2]
-                << "\t" << p.velocity[0]
-                << "\t" << p.velocity[1]
-                << "\t" << p.velocity[2]
-                << "\t" << p.force[0]
-                << "\t" << p.force[1]
-                << "\t" << p.force[2];
+        // dumpstate at intervals
+        if (step % dumpInterval == 0) {
+            out << particles.size();
+            for (const Particle &p : particles) {
+                out << "\t" << p.mass
+                    << "\t" << p.position[0]
+                    << "\t" << p.position[1]
+                    << "\t" << p.position[2]
+                    << "\t" << p.velocity[0]
+                    << "\t" << p.velocity[1]
+                    << "\t" << p.velocity[2]
+                    << "\t" << p.force[0]
+                    << "\t" << p.force[1]
+                    << "\t" << p.force[2];
+            }
+            out << "\n";
         }
-
-        out << "\n";
     }
+
     out.close();
+
+    // end and print time
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> timeElapsed = end - start;
+    std::cout << "Simulation completed in " << timeElapsed.count() << " seconds.\n";
 
     return 0;
 }
