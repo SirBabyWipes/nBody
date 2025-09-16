@@ -8,6 +8,6 @@ for the solar system test run that file with no other inputs as such:
 
 ./test
 
-Or if you would like to make your own particles, you can add 3 inputs as such (number of particles, dt, steps)
+Or if you would like to make your own particles, you can add 4 inputs as such (number of particles, dt, steps, dump interval)
 
-./test 10 1 100
+./test 10 1 100 1
